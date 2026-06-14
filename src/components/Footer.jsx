@@ -1,40 +1,65 @@
-import { FaDiscord, FaTwitter, FaYoutube, FaMedium } from "react-icons/fa";
+import { FaWhatsapp, FaYoutube, FaInstagram, FaTelegram } from "react-icons/fa";
 
 const socialLinks = [
-  { href: "https://discord.com", icon: <FaDiscord /> },
-  { href: "https://twitter.com", icon: <FaTwitter /> },
-  { href: "https://youtube.com", icon: <FaYoutube /> },
-  { href: "https://medium.com", icon: <FaMedium /> },
+  { href: "https://wa.me/6285935313080", icon: <FaWhatsapp />, label: "WhatsApp" },
+  { href: "https://t.me/redeem_gemini_bot?start=ref_1787908361", icon: <FaTelegram />, label: "Telegram" },
+  { href: "https://youtube.com", icon: <FaYoutube />, label: "YouTube" },
+  { href: "https://instagram.com", icon: <FaInstagram />, label: "Instagram" },
 ];
 
 const Footer = () => {
   return (
-    <footer className="w-screen bg-[#5542ff] py-4 text-black">
-      <div className="container mx-auto flex flex-col items-center justify-between gap-4 px-4 md:flex-row">
-        <p className="text-center text-sm font-light md:text-left">
-          ©Nova 2024. All rights reserved
-        </p>
+    <footer
+      className="w-screen py-8"
+      style={{
+        background: "#050505",
+        borderTop: "1px solid rgba(255,255,255,0.06)",
+      }}
+    >
+      <div className="container mx-auto flex flex-col items-center justify-between gap-6 px-6 md:flex-row">
+        {/* Logo + copyright */}
+        <div className="flex items-center gap-3">
+          <img src="/img/logo.png" alt="Gemini" style={{ width: 28, height: 28, objectFit: "contain" }} />
+          <p
+            className="text-sm font-light"
+            style={{ color: "rgba(255,255,255,0.3)", fontFamily: "Inter, sans-serif" }}
+          >
+            © 2025 Gemini Pro Access. All rights reserved.
+          </p>
+        </div>
 
-        <div className="flex justify-center gap-4  md:justify-start">
+        {/* Social links */}
+        <div className="flex justify-center gap-5">
           {socialLinks.map((link, index) => (
             <a
               key={index}
               href={link.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-black transition-colors duration-500 ease-in-out hover:text-white"
+              aria-label={link.label}
+              className="text-xl transition-all duration-300 hover:scale-125"
+              style={{ color: "rgba(255,255,255,0.3)" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#4285F4")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.3)")}
             >
               {link.icon}
             </a>
           ))}
         </div>
 
-        <a
-          href="#privacy-policy"
-          className="text-center text-sm font-light hover:underline md:text-right"
-        >
-          Privacy Policy
-        </a>
+        {/* Links */}
+        <div className="flex gap-5">
+          {["Kebijakan Privasi", "Syarat & Ketentuan"].map((t) => (
+            <a
+              key={t}
+              href="#"
+              className="text-xs font-light hover:underline"
+              style={{ color: "rgba(255,255,255,0.25)", fontFamily: "Inter, sans-serif" }}
+            >
+              {t}
+            </a>
+          ))}
+        </div>
       </div>
     </footer>
   );

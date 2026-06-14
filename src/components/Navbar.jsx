@@ -2,11 +2,24 @@ import clsx from "clsx";
 import gsap from "gsap";
 import { useWindowScroll } from "react-use";
 import { useEffect, useRef, useState } from "react";
-import { TiLocationArrow } from "react-icons/ti";
 
-import Button from "./Button";
+const navItems = ["Fitur", "Tentang", "Cara Klaim", "Kontak"];
 
-const navItems = ["Nexus", "Vault", "Prologue", "About", "Contact"];
+// Smooth scroll helper — works on iOS Safari, Android Chrome, all desktop browsers
+const scrollTo = (id) => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+};
+
+// Maps each nav item to the section ID it should scroll to
+const navScrollTargets = [
+  "about",          // Fitur
+  "story",          // Tentang
+  "claim-section",  // Cara Klaim → langsung ke tombol Telegram klaim
+  "contact",        // Kontak
+];
 
 const NavBar = () => {
   // State for toggling audio and visual indicator
@@ -69,29 +82,29 @@ const NavBar = () => {
     >
       <header className="absolute top-1/2 w-full -translate-y-1/2">
         <nav className="flex size-full items-center justify-between p-4">
-          {/* Logo and Product button */}
-          <div className="flex items-center gap-7">
-            <img src="/img/logo.png" alt="logo" className="w-10" />
-
-            <Button
-              id="product-button"
-              title="Products"
-              rightIcon={<TiLocationArrow />}
-              containerClass="bg-blue-50 md:flex hidden items-center justify-center gap-1"
-            />
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+            <img src="/img/logo.png" alt="Gemini" className="w-9 h-9 object-contain" />
+            <span
+              className="hidden sm:block font-bold text-sm"
+              style={{ color: "rgba(255,255,255,0.9)", fontFamily: "Inter, sans-serif", letterSpacing: "-0.01em" }}
+            >
+              Gemini Pro
+            </span>
           </div>
 
           {/* Navigation Links and Audio Button */}
           <div className="flex h-full items-center">
             <div className="hidden md:block">
               {navItems.map((item, index) => (
-                <a
+                <button
                   key={index}
-                  href={`#${item.toLowerCase()}`}
+                  onClick={() => scrollTo(navScrollTargets[index])}
                   className="nav-hover-btn"
+                  style={{ background: "none", border: "none", cursor: "pointer" }}
                 >
                   {item}
-                </a>
+                </button>
               ))}
             </div>
 
