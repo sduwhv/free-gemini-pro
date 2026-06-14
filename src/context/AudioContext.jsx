@@ -148,8 +148,25 @@ export const AudioProvider = ({ children }) => {
     }
   }, [isUnlocked, unlock]);
 
+  // ── 6. Explicit play for Preloader ───────────────────────
+  const playAudio = useCallback(async () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (!isUnlocked) {
+      await unlock();
+    }
+    
+    if (audio.paused) {
+      try {
+        await audio.play();
+        setIsPlaying(true);
+      } catch (_) {}
+    }
+  }, [isUnlocked, unlock]);
+
   return (
-    <AudioCtx.Provider value={{ isPlaying, toggleAudio, isUnlocked }}>
+    <AudioCtx.Provider value={{ isPlaying, toggleAudio, playAudio, isUnlocked }}>
       {children}
     </AudioCtx.Provider>
   );
