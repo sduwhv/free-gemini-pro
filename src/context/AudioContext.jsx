@@ -3,29 +3,24 @@ import { createContext, useContext, useRef, useState, useEffect, useCallback } f
 // ─────────────────────────────────────────────────────────────
 //  Global Audio Context
 //  Provides a single audio instance shared across all components.
-//  Technique: AudioContext unlock (bypasses autoplay policy on
-//  Chrome/Firefox/Safari/iOS) used by Spotify Web Player &
-//  YouTube Music — most reliable approach available in 2024.
+//  Uses pure HTML5 Audio to avoid CORS silent bugs and 
+//  asynchronous browser gesture chain breakage on mobile.
 // ─────────────────────────────────────────────────────────────
 
 const AudioCtx = createContext(null);
 
 export const AudioProvider = ({ children }) => {
   const audioRef = useRef(null);
-  const audioCtxRef = useRef(null);      // Web AudioContext for unlock
-  const sourceRef = useRef(null);        // MediaElementSourceNode
   const [isPlaying, setIsPlaying] = useState(false);
   const [isUnlocked, setIsUnlocked] = useState(false);
-  const unlockedRef = useRef(false);
 
   // ── 1. Create the HTMLAudioElement once ──────────────────
   useEffect(() => {
+    // bgm.mp3.mp3 is the exact name of the file in public/mp3/
     const audio = new Audio("/mp3/bgm.mp3.mp3");
     audio.loop = true;
     audio.volume = 0.3;
     audio.preload = "auto";
-    // Security: restrict CORS on the audio request
-    audio.crossOrigin = "anonymous";
     audioRef.current = audio;
 
     return () => {
@@ -34,86 +29,81 @@ export const AudioProvider = ({ children }) => {
     };
   }, []);
 
-  // ── 2. Unlock AudioContext on first user gesture ─────────
-  //  Most browsers (including iOS Safari since iOS 13) require a
-  //  user-gesture before ANY audio can play. We listen for the
-  //  FIRST gesture on the document and resume the suspended
-  //  AudioContext, which permanently unlocks audio for the session.
-  const unlock = useCallback(async () => {
-    if (unlockedRef.current) return;
-    unlockedRef.current = true;
+  // ── 2. Play audio (Synchronous to preserve user gesture) ──
+  const playAudio = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
 
-    try {
-      // Create Web AudioContext
-      if (!audioCtxRef.current) {
-        const AudioContextClass =
-          window.AudioContext || window.webkitAudioContext;
-        if (AudioContextClass) {
-          audioCtxRef.current = new AudioContextClass();
-          // Connect our <audio> element through the Web AudioContext
-          // so it shares the same unlocked context
-          if (!sourceRef.current && audioRef.current) {
-            sourceRef.current = audioCtxRef.current.createMediaElementSource(
-              audioRef.current
-            );
-            sourceRef.current.connect(audioCtxRef.current.destination);
-          }
-        }
-      }
+    audio.play()
+      .then(() => {
+        setIsPlaying(true);
+        setIsUnlocked(true);
+      })
+      .catch((err) => {
+        console.warn("Autoplay blocked or playback failed:", err);
+      });
+  }, []);
 
-      if (audioCtxRef.current?.state === "suspended") {
-        await audioCtxRef.current.resume();
-      }
+  // ── 3. Toggle play/pause ─────────────────────────────────
+  const toggleAudio = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
 
-      setIsUnlocked(true);
-
-      // Start playing immediately after unlock
-      if (audioRef.current) {
-        try {
-          await audioRef.current.play();
+    if (audio.paused) {
+      audio.play()
+        .then(() => {
           setIsPlaying(true);
-        } catch (_) {
-          // User may have paused — that's OK
-        }
-      }
-    } catch (_) {
-      // Silently fail — audio is non-critical
+          setIsUnlocked(true);
+        })
+        .catch((err) => {
+          console.warn("Playback failed:", err);
+        });
+    } else {
+      audio.pause();
+      setIsPlaying(false);
     }
   }, []);
 
-  // ── 3. Attempt silent autoplay on mount ─────────────────
-  //  Works in browsers that allow autoplay (desktop Chrome with
-  //  the site previously visited, or when MEI > 0).
+  // ── 4. Try silent autoplay on mount (MEI score fallback) ──
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    const tryAutoplay = async () => {
-      try {
-        await audio.play();
-        setIsPlaying(true);
-        setIsUnlocked(true);
-        unlockedRef.current = true;
-      } catch (_) {
-        // Blocked — wait for first user interaction (step 4)
-      }
+    const tryAutoplay = () => {
+      audio.play()
+        .then(() => {
+          setIsPlaying(true);
+          setIsUnlocked(true);
+        })
+        .catch(() => {
+          // Blocked by browser autoplay policy — user gesture required
+        });
     };
 
-    // Small delay so the browser marks the page as "loaded"
-    // which improves MEI score and autoplay chance
     const timer = setTimeout(tryAutoplay, 200);
     return () => clearTimeout(timer);
   }, []);
 
-  // ── 4. Listen for first user interaction as fallback ────
+  // ── 5. Fallback unlock on first interaction anywhere ──────
   useEffect(() => {
     const events = ["click", "touchstart", "keydown", "pointerdown"];
+    
     const handleInteraction = () => {
-      unlock();
-      // Remove all listeners after first interaction
-      events.forEach((e) =>
-        document.removeEventListener(e, handleInteraction, true)
-      );
+      const audio = audioRef.current;
+      if (audio && audio.paused) {
+        audio.play()
+          .then(() => {
+            setIsPlaying(true);
+            setIsUnlocked(true);
+            // Remove listeners once successfully playing
+            events.forEach((e) =>
+              document.removeEventListener(e, handleInteraction, true)
+            );
+          })
+          .catch(() => {
+            // Keep listening if it fails
+          });
+      }
     };
 
     events.forEach((e) =>
@@ -125,45 +115,7 @@ export const AudioProvider = ({ children }) => {
         document.removeEventListener(e, handleInteraction, true)
       );
     };
-  }, [unlock]);
-
-  // ── 5. Toggle play/pause ─────────────────────────────────
-  const toggleAudio = useCallback(async () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (!isUnlocked) {
-      await unlock();
-      return;
-    }
-
-    if (audio.paused) {
-      try {
-        await audio.play();
-        setIsPlaying(true);
-      } catch (_) {}
-    } else {
-      audio.pause();
-      setIsPlaying(false);
-    }
-  }, [isUnlocked, unlock]);
-
-  // ── 6. Explicit play for Preloader ───────────────────────
-  const playAudio = useCallback(async () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (!isUnlocked) {
-      await unlock();
-    }
-    
-    if (audio.paused) {
-      try {
-        await audio.play();
-        setIsPlaying(true);
-      } catch (_) {}
-    }
-  }, [isUnlocked, unlock]);
+  }, []);
 
   return (
     <AudioCtx.Provider value={{ isPlaying, toggleAudio, playAudio, isUnlocked }}>
@@ -172,7 +124,6 @@ export const AudioProvider = ({ children }) => {
   );
 };
 
-// Custom hook for consuming audio state
 export const useAudio = () => {
   const ctx = useContext(AudioCtx);
   if (!ctx) throw new Error("useAudio must be used within AudioProvider");
