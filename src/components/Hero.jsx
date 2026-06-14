@@ -7,10 +7,22 @@ gsap.registerPlugin(ScrollTrigger);
 
 const Hero = () => {
   useGSAP(() => {
+    const isMobile = window.innerWidth < 768;
+
+    // Pada HP/mobile, gunakan clip-path simetris agar video seimbang di tengah
+    const targetClipPath = isMobile
+      ? "polygon(4% 0%, 96% 0%, 92% 98%, 8% 98%)" // trapesium simetris seimbang
+      : "polygon(14% 0, 72% 0, 88% 90%, 0 95%)";   // trapesium miring desktop
+
+    const targetBorderRadius = isMobile
+      ? "0% 0% 24px 24px" // rounded corners simetris di HP
+      : "0% 0% 40% 10%";  // rounded corners miring desktop
+
     gsap.set("#video-frame", {
-      clipPath: "polygon(14% 0, 72% 0, 88% 90%, 0 95%)",
-      borderRadius: "0% 0% 40% 10%",
+      clipPath: targetClipPath,
+      borderRadius: targetBorderRadius,
     });
+    
     gsap.from("#video-frame", {
       clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
       borderRadius: "0% 0% 0% 0%",
