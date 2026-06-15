@@ -165,14 +165,14 @@ const Hero = () => {
             loop
             muted
             playsInline
+            preload="auto"
             className="absolute inset-0 w-full h-full object-cover"
             style={{
-              transform: "translateZ(0) scale(1.001)", /* sub-pixel fix */
+              transform: "translate3d(0, 0, 0) scale(1.001)", /* sub-pixel GPU fix */
               backfaceVisibility: "hidden",
               WebkitBackfaceVisibility: "hidden",
               willChange: "transform",
               imageRendering: "auto", /* smooths out video compression blocks */
-              filter: "contrast(1.06) brightness(1.03) saturate(1.08)", /* enhance detail and colors */
             }}
           />
 
