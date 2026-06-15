@@ -120,7 +120,7 @@ const Hero = () => {
       // Pada HP/mobile, bypass scrollTrigger clip-path untuk menghindari video terpotong
       gsap.set("#video-frame", {
         clipPath: "none",
-        borderRadius: "24px",
+        borderRadius: "0px 0px 24px 24px",
       });
       return;
     }
@@ -151,10 +151,10 @@ const Hero = () => {
   };
 
   return (
-    <div className="relative min-h-screen md:h-dvh w-screen overflow-x-hidden flex flex-col justify-center items-center md:block bg-[#080808] pt-20 pb-8 md:p-0">
+    <div className="relative min-h-screen md:h-dvh w-screen overflow-x-hidden flex flex-col justify-start items-center md:block bg-[#080808] pb-12 md:p-0">
       <div
         id="video-frame"
-        className="relative z-10 w-[92vw] aspect-square md:w-screen md:h-dvh overflow-hidden rounded-2xl md:rounded-lg shadow-2xl md:shadow-none border border-white/5 md:border-none mx-auto md:mx-0"
+        className="relative z-10 w-full aspect-square md:w-screen md:h-dvh overflow-hidden rounded-b-3xl md:rounded-lg shadow-2xl md:shadow-none border-b border-white/5 md:border-none"
         style={{ background: "#050505" }}
       >
         {/* ── Video Layer ── */}
