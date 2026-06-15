@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { openTelegram } from "../utils/telegram";
+import { openTelegram, openTelegram2 } from "../utils/telegram";
 
 // ════════════════════════════════════════════════════════════
 // SVG Logo Components — all paths verified from official sources
@@ -486,7 +486,7 @@ const GeminiFunnel = () => {
       {/* ══ SECTION 5 — MAIN CTA (Telegram) ════════════════ */}
       {/* Anchor target — scroll-to lands HERE so Telegram button is immediately visible */}
       <div id="claim-section" style={{ scrollMarginTop: "80px" }} />
-      <div className="flex justify-center mb-12">
+      <div className="flex flex-col items-center gap-6 mb-12">
         {/*
           Deep Link Strategy (profesional — dipakai Telegram, WhatsApp, Tokopedia):
           1. Deteksi apakah user di mobile (userAgent check)
@@ -521,7 +521,49 @@ const GeminiFunnel = () => {
             <svg className="w-6 h-6 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.17 13.23l-2.969-.924c-.645-.204-.657-.645.135-.954l11.566-4.458c.537-.194 1.006.131.992.327z" />
             </svg>
-            Klaim Gemini Pro 1 Tahun — GRATIS
+            Klaim Gemini Pro 1 Tahun — GRATIS (Link 1)
+          </span>
+        </button>
+
+        {/* Copy text connecting link 1 and link 2 */}
+        <div className="flex flex-col items-center text-center max-w-md px-4 mt-2">
+          <p className="text-xs font-semibold text-white/50 tracking-wider uppercase flex items-center justify-center gap-1.5" style={{ fontFamily: "Inter, sans-serif" }}>
+            <span className="text-purple-400">💡</span> Limit atau tidak bisa? Coba Server Cadangan:
+          </p>
+          <p className="text-[11px] text-white/35 mt-1" style={{ fontFamily: "Inter, sans-serif" }}>
+            Gunakan Link 2 di bawah jika Link Utama mengalami gangguan kuota
+          </p>
+        </div>
+
+        {/* Button 2 (Alternatif Link) */}
+        <button
+          id="telegram-claim-btn-2"
+          onClick={openTelegram2}
+          className="group relative inline-block cursor-pointer"
+          style={{ background: "none", border: "none", padding: 0 }}
+        >
+          <span
+            className="absolute inset-0 rounded-2xl blur-xl opacity-70"
+            style={{ background: "linear-gradient(135deg, #7c3aed, #a855f7)", animation: "pulse 2.5s ease-in-out infinite" }}
+          />
+          <span
+            className="relative flex items-center gap-3 rounded-2xl font-black text-white shadow-2xl"
+            style={{
+              padding: "18px 40px",
+              background: "linear-gradient(135deg, #5b21b6, #7c3aed, #c084fc)",
+              boxShadow: "0 0 50px rgba(124,58,237,0.55), 0 0 100px rgba(124,58,237,0.15)",
+              fontFamily: "Inter, sans-serif",
+              fontSize: "clamp(0.95rem, 2.5vw, 1.15rem)",
+              letterSpacing: "-0.01em",
+              transition: "transform 0.2s ease",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.04)")}
+            onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+          >
+            <svg className="w-6 h-6 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.17 13.23l-2.969-.924c-.645-.204-.657-.645.135-.954l11.566-4.458c.537-.194 1.006.131.992.327z" />
+            </svg>
+            Klaim Gemini Pro via Server Cadangan (Link 2)
           </span>
         </button>
       </div>
